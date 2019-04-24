@@ -1,4 +1,4 @@
-from itertools import chain
+from itertools import chain, filterfalse
 from asm import BA2Assembler
 from isa.instructions import InstructionGroupLookup
 from isa.types import LetterCodes, OperandType
@@ -6,15 +6,9 @@ from pprint import pprint
 from random import randint
 
 
-SHOW_ALL = False
-SHOW_CHANGED = True
-SHOW_REFFED = True
-SHOW_MATCHING = True
-
-
 class TestOpCode (gdb.Command):
     BASE_ADDRESS = 0x4000000
-    REGISTERS = [f"R{n}" for n in range(32)] + ["PC", "SR", "UR", "EPCR", "ESR", "EEAR"]
+    REGISTERS = set([f"R{n}" for n in range(32)] + ["PC", "SR", "UR", "EPCR", "ESR", "EEAR"])
 
     def __init__(self):
         super ().__init__ ("test-opcode", gdb.COMMAND_USER)
@@ -41,6 +35,15 @@ class TestOpCode (gdb.Command):
         self._reg_state_after = self._dump_registers ()
         self._mem_state_after = self._dump_memory ()
 
+    def _find_direct_sources (self, value):
+        sources = {}
+
+        for reg in self.REGISTERS:
+            if self._reg_state_before[reg] == value:
+                sources[reg] = value
+
+        return sources
+
     def _test_insn (self, insn_class, args):
         insn = insn_class (args, self.BASE_ADDRESS)
 
@@ -56,15 +59,26 @@ class TestOpCode (gdb.Command):
         if self._reg_state_after['PC'] == self.BASE_ADDRESS:
             print ("Execution failed - check your arguments!")
         else:
-            for reg in self.REGISTERS:
+            changed_regs = filterfalse (
+                lambda reg: self._reg_state_before[reg] == self._reg_state_after[reg],
+                self.REGISTERS)
+            unchanged_regs = filterfalse (
+                lambda reg: self._reg_state_before[reg] != self._reg_state_after[reg],
+                self.REGISTERS)
+
+            for reg in changed_regs:
+                sources = {}
+
                 before = self._reg_state_before[reg]
                 after = self._reg_state_after[reg]
+                print (f" * {reg}: {before} -> {after}")
 
-                if before == after:
-                    if SHOW_ALL:
-                        print (f"   {reg}: {after}")
-                else:
-                    print (f" * {reg}: {before} -> {after}")
+                sources.update (self._find_direct_sources (after))
+
+                for src, value in sources.items():
+                    print (f"   {src}: {value}")
+
+                print ("   ---")
 
     def _generate_args (self, insn_class):
         args = {}
