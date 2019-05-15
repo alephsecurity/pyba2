@@ -225,7 +225,7 @@ class Instruction(object):
 
                 table[letter] = hex(value)
 
-        return f"{self.MNEMONIC:11}{operands.translate(str.maketrans(table))}"
+        return f"{self.MNEMONIC:11} {operands.translate(str.maketrans(table))}"
 
 ## Helpers
 
@@ -297,15 +297,21 @@ class BtMoviInstruction(ArithmeticInstruction):
     def __init__(self, operands, vma):
         if operands['D'] == 0:
             raise InstructionMismatchException("This is bt.trap!")
-        super(BtMoviInstruction, self).__init__(operands, vma)
+        super().__init__(operands, vma)
 
 @instruction("bt.trap", "G", "0x0 0000 0000 GGGG")
 class BtTrapInstruction(TrapInstruction):
-    def __init__(self, operands, vma):
-        super(BtTrapInstruction, self).__init__(operands, vma)
+    pass
 
 @instruction("bt.addi", "rD,rD,G", "0x0 00 DD DDD1 GGGG", "{G},r{D},+,r{D},=")
 class BtAddiInstruction(ArithmeticInstruction):
+    def __init__(self, operands, vma):
+        if operands['D'] == 0:
+            raise InstructionMismatchException("This is bt.nop!")
+        super().__init__(operands, vma)
+
+@instruction("bt.nop", "G", "0x0 00 00 0001 GGGG")
+class BtNopInstruction(NopInstruction):
     pass
 
 @instruction("bt.mov", "rD,rA", "0x0 01 DD DDDA AAAA", "r{A},r{D},=")
@@ -313,7 +319,7 @@ class BtMovInstruction(ArithmeticInstruction):
     def __init__(self, operands, vma):
         if operands['D'] == 0 and operands['A'] in (0, 1, 2, 3):
             raise InstructionMismatchException("This is bt.rtrap!")
-        super(BtMovInstruction, self).__init__(operands, vma)
+        super().__init__(operands, vma)
 
 @instruction("bt.rfe", "", "0x0 01 00 0000 0000")
 class BtRfeInstruction(TrapInstruction):
@@ -858,9 +864,16 @@ class FnDivSInstruction(FloatInstruction):
 class BnAddsInstruction(ArithmeticInstruction):
     pass
 
-#TODO: unknown - saturated? vectors?
+#TODO: unknown - saturated? vectors? looks like signed subtraction...
 @instruction("bn.subs", "rD,rA,rB", "0x7 01 DD DDDA AAAA BBBB B001")
 class BnSubsInstruction(ArithmeticInstruction):
+    def __init__ (self, operands, vma):
+        if operands['A'] == 0:
+            raise InstructionMismatchException("This is bn.neg!")
+        super().__init__(operands, vma)
+
+@instruction("bn.neg", "rD,rB", "0x7 01 DD DDD0 0000 BBBB B001")
+class BnNegInstruction(ArithmeticInstruction):
     pass
 
 #TODO: unknown
@@ -956,6 +969,13 @@ class BwAddiInstruction(ArithmeticInstruction):
 
 @instruction("bw.andi", "rD,rA,h", "0x9 01 DD DDDA AAAA hhhh hhhh hhhh hhhh hhhh hhhh hhhh hhhh", "{h},r{A},&,r{D},=")
 class BwAndiInstruction(BitwiseInstruction):
+    def __init__(self, operands, vma):
+        if operands['h'] == 0x7fffffff:
+            raise InstructionMismatchException("This is f.abs.s!")
+        super().__init__(operands, vma)
+
+@instruction("f.abs.s", "rD,rA", "0x9 01 DD DDDA AAAA 1111 1111 1111 1111 1111 1111 1111 1110", "0x7fffffff,r{A},&,r{D},=")
+class FAbsInstruction(ArithmeticInstruction):
     pass
 
 @instruction("bw.ori", "rD,rA,h", "0x9 10 DD DDDA AAAA hhhh hhhh hhhh hhhh hhhh hhhh hhhh hhhh", "{h},r{A},|,r{D},=")
@@ -1444,6 +1464,7 @@ InstructionGroupLookup = {
     0: [BtMoviInstruction,
         BtTrapInstruction,
         BtAddiInstruction,
+        BtNopInstruction,
         BtMovInstruction,
         BtRfeInstruction,
         BtEiInstruction,
@@ -1564,6 +1585,7 @@ InstructionGroupLookup = {
         FnDivSInstruction,
         BnAddsInstruction,
         BnSubsInstruction,
+        BnNegInstruction,
         BnXaaddInstruction,
         BnXcmpxchgInstruction,
         BnMaxInstruction,
@@ -1584,6 +1606,7 @@ InstructionGroupLookup = {
         BwLdInstruction],
     9: [BwAddiInstruction,
         BwAndiInstruction,
+        FAbsInstruction,
         BwOriInstruction,
         BwSfeqiInstruction,
         BwSfneiInstruction,
