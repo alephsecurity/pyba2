@@ -43,10 +43,10 @@ LetterCodes = {
     'E': {'flags': OperandType.LSB, 'length': 3},
     'F': {'flags': OperandType.LSB, 'length': 4},
     'G': {'flags': OperandType.SIG | OperandType.LSB, 'length': 4},
-    'L': {'flags': OperandType.SIG | OperandType.LSB, 'length': 4},
+    'L': {'flags': OperandType.SIG | OperandType.LSB, 'length': 4}, # This actually doesn't seem to be LSB...
     'H': {'flags': OperandType.LSB, 'length': 5},
     'I': {'flags': OperandType.SIG | OperandType.LSB, 'length': 5},
-    'J': {'flags': OperandType.LSB, 'length': 5},
+    'J': {'flags': OperandType.LSB | OperandType.DUNSIG, 'length': 5}, # Added DUNSIG to match binutils behavior
     'K': {'flags': OperandType.LSB | OperandType.DUNSIG, 'length': 6}, # Added DUNSIG to match binutils behavior
     'M': {'flags': OperandType.LSB | OperandType.DUNSIG, 'length': 7}, # Added DUNSIG to match binutils behavior
     'N': {'flags': OperandType.LSB, 'length': 8},
@@ -55,7 +55,7 @@ LetterCodes = {
     'T': {'flags': OperandType.SIG | OperandType.REL | OperandType.LSB, 'length': 10},
     'U': {'flags': OperandType.SIG | OperandType.REL | OperandType.LSB, 'length': 12},
     'S': {'flags': OperandType.SIG | OperandType.REL | OperandType.LSB, 'length': 12},
-    'V': {'flags': OperandType.SIG | OperandType.LSB, 'length': 13},
+    'V': {'flags': OperandType.SIG | OperandType.LSB | OperandType.DUNSIG, 'length': 13}, # Added DUNSIG to match binutils behavior
     'W': {'flags': OperandType.SIG | OperandType.LSB | OperandType.DUNSIG, 'length': 14}, # Added DUNSIG to match binutils behavior
     'X': {'flags': OperandType.SIG | OperandType.LSB | OperandType.DUNSIG, 'length': 15}, # Added DUNSIG to match binutils behavior
     'Y': {'flags': OperandType.SIG | OperandType.LSB, 'length': 16},
