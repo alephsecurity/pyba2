@@ -9,7 +9,6 @@ class BA2Assembler:
             print ("a", a)
 
     def assemble(self, asm, addr):
-        print (asm)
         try:
             return instructions.Instruction.lower(asm, addr).encode()
         except Exception as e:
