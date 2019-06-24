@@ -101,7 +101,7 @@ class JennicLoader:
             self._a = a
             print ("a", a)
 
-    def load_bytes(self, binf, buf, loadaddr):
+    def load_buffer(self, binf, buf, loadaddr):
         return [True]
 
     def baddr(self, binf):
@@ -189,7 +189,7 @@ def jn5168bin(a):
         "desc": "JN516x/JN517x firmware loader plugin",
         "license": "BSD",
         "check_bytes": loader.check_bytes,
-        "load_bytes": loader.load_bytes,
+        "load_buffer": loader.load_buffer,
         "info": loader.info,
         "sections": loader.sections,
         "baddr": loader.baddr,
