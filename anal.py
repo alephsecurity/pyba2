@@ -129,14 +129,14 @@ class BA2Analyzer:
 
             elif isinstance(insn, instructions.LoadInstruction):
                 op['type'] = R.R_ANAL_OP_TYPE_LOAD
-                if isinstance(insn, instructions.BnEntriInstruction):
-                    op['type'] = R.R_ANAL_OP_TYPE_RET
+                if isinstance(insn, instructions.BnRetiInstruction):
+                    op['type'] = R.R_ANAL_OP_TYPE_POP
                     op['stackop'] = R.R_ANAL_STACK_INC
 
             elif isinstance(insn, instructions.StoreInstruction):
                 op['type'] = R.R_ANAL_OP_TYPE_STORE
                 if isinstance(insn, instructions.BnEntriInstruction):
-                    op['type'] = R.R_ANAL_OP_TYPE_SUB
+                    op['type'] = R.R_ANAL_OP_TYPE_PUSH
                     op['stackop'] = R.R_ANAL_STACK_INC
 
             elif isinstance(insn, instructions.MoveInstruction):
