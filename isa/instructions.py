@@ -318,7 +318,7 @@ class BtNopInstruction(NopInstruction):
 class BtMovInstruction(ArithmeticInstruction):
     def __init__(self, operands, vma):
         if operands['D'] == 0 and operands['A'] in (0, 1, 2, 3):
-            raise InstructionMismatchException("This is bt.rtrap!")
+            raise InstructionMismatchException("This is bt.rfe/bt.ei/bt.di/bt.sys!")
         super().__init__(operands, vma)
 
 @instruction("bt.rfe", "", "0x0 01 00 0000 0000")
@@ -596,6 +596,7 @@ class BnEntriInstruction(StoreInstruction):
 
 #TODO: function epilogue - frame deconstruction
 # Increase the $sp/R1 by N 32-bit words, then pop F GPRs (ending with $lr/R9)
+# Possibly returns, as well? (based on the fact that it's the final instruction of many functions)
 @instruction("bn.reti", "F,N",  "0x4 01 11 1011 FFFF NNNN NNNN")
 class BnRetiInstruction(LoadInstruction):
     pass
