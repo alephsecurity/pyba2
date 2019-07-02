@@ -55,7 +55,7 @@ class FlashHeader:
 
     @property
     def encryption_init_vector(self):
-        return self._slice(0x10, 14)
+        return self._slice(0x10, 4)
 
     @property
     def sw_conf(self):
